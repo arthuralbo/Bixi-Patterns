@@ -143,6 +143,20 @@ texts = {
         'arrival' : 'arrivals',
         'title_homepage' : 'Decoding Bixi Rides Pattern',
         'intro_homepage' : "Discover when each Bixi station fills up or empties for any given day. Perfect for planning your rides or understanding the city’s biking rhythm.",
+        'app_description_header' : "About the project:",
+        'app_description' : """
+            Have you ever rushed out, ready to grab a Bixi bike, only to find none available?
+            Or maybe you’ve finished your ride, but every dock nearby is full?
+
+            This app was born out of those everyday frustrations. It lets you explore the rhythm of Bixi stations across Montréal using historical data from the past two years.
+            The visualizations show averages based on past activity — not real-time predictions — revealing when each station tends to fill up or empty throughout the day and week.
+            It’s a simple, visual way to understand the cycling heartbeat of the city and better plan your rides.
+            """,
+        'author_description_header' : "About the author:",
+        'author_description' : """
+            My name is Arthur Albo, and I’m a student in mathematics and statistics with a passion for data science. This project was born from both my interest in data analysis and a personal experience: as a regular Bixi user, I’ve often struggled to find an available bike when I needed one, or a free dock at the end of my ride.
+            I created this app to provide a simple, visual tool that helps users better understand the system and anticipate trends, making daily rides a little easier and more predictable.
+            """,
         'intro_stations' : "Find out about your station's rythm and plan your trips smarter",
         'station_selection_stations' : "Pick a station and start exploring",
         'day_selection_stations' : "Pick a day of the week:",
@@ -160,9 +174,9 @@ texts = {
         'colour_plot_legend_grey_stations' : "⚪: No data found for this time",
         'ditribution_plot_stations' : "Check Hourly Ride Distribution",
         'more_stations_nearby_stations' : '**Find more stations nearby and check their availabilities!**',
-        'title_bixi_wrap' : "Bixi Wrap 2024",
+        'title_bixi_wrap' : "Bixi Wrap for the year",
         'intro_bixi_wrap' : 'Explore the past year through data',
-        'comment_bixi_wrap' : 'Thanks to riders like you, Bixi has been used more than 13 Million times in the past year',
+        'comment_bixi_wrap' : 'Thanks to riders all around, Bixi has seen more than 20 Million rides in the past year',
         'filtering_neighbourhood_bixi_wrap' : 'Filter by neighbourhood:',
         'most_frequented_stations_arrival_bixi_wrap' : "**Most Frequented Stations to Drop off Bikes:**",
         'most_frequented_stations_departure_bixi_wrap' : "**Most Frequented Stations to Pickup Bikes:**"
@@ -174,8 +188,23 @@ texts = {
         'all' : 'Tous',
         'departure' : 'départs',
         'arrival' : 'arrivées',
-        'title_homepage' : "L'envers du décors des trajets Bixi",
-        'intro_homepage' : "Découvrez à quel moment chaque station Bixi se remplit ou se vide selon le jour. Idéal pour planifier vos trajets ou comprendre le rythme cycliste de la ville.",
+        'title_homepage' : "Le battement des stations Bixi",
+        'intro_homepage' : "Découvrez quand chaque station s’anime ou se repose, selon le jour de la semaine. Idéal pour planifier vos trajets ou comprendre le rythme cycliste de la ville.",
+        'app_description_header' : "À propos de ce projet:",
+        'app_description' : """
+            Vous est-il déjà arrivé de courir après un Bixi un matin pressé… pour finalement ne trouver aucun vélo disponible?
+            Ou encore, après une longue balade, de tourner en rond à la recherche d’un dock libre pour le déposer?
+
+            Cette application est née de ce genre de frustrations. Elle vous permet d’explorer le rythme des stations Bixi à Montréal à partir des données historiques des deux dernières années.
+            Les graphiques présentés illustrent des moyennes observées — et non des prédictions — pour révéler quand chaque station a tendance à se remplir ou se vider selon le jour et l’heure.
+            Une façon simple et visuelle de mieux comprendre le pouls cycliste de la ville et d’anticiper vos trajets.
+            """,
+        'author_description_header' : "À propos de l'auteur:",
+        "author_description" : """
+            Je m’appelle Arthur Albo, étudiant en mathématiques et statistiques, passionné par la science des données. "
+            Ce projet est né à la fois d’un intérêt pour l’analyse de données et d’une expérience personnelle : en tant qu’utilisateur régulier de Bixi, j’ai souvent eu du mal à trouver un vélo ou une borne libre. 
+            J’ai donc voulu créer un outil simple et visuel pour mieux comprendre le système et anticiper ses tendances.
+            """,
         'intro_stations' : "Découvrez le rythme de votre station et planifiez vos déplacements plus intelligemment",
         'station_selection_stations' : "Choisissez une station et commencez votre exploration",
         'day_selection_stations' : "Choisissez un jour de la semaine:",
@@ -193,9 +222,9 @@ texts = {
         'colour_plot_legend_grey_stations' : "⚪: Aucune données trouvées",
         'ditribution_plot_stations' : "Consultez la distribution horaire des trajets",
         'more_stations_nearby_stations' : '**Trouvez d’autres stations à proximité et vérifiez leur disponibilité !**',
-        'title_bixi_wrap' : "Rétrospective Bixi 2024",
+        'title_bixi_wrap' : "Rétrospective Bixi de l'année",
         'intro_bixi_wrap' : "Explorez l’année écoulée à travers les données",
-        'comment_bixi_wrap' : "Grâce à des cyclistes comme vous, Bixi a été utilisé plus de 13 millions de fois cette année",
+        'comment_bixi_wrap' : "Grâce aux cyclistes de partout, Bixi a été utilisé plus de 20 millions de fois cette année",
         'filtering_neighbourhood_bixi_wrap' : 'Filtrer par quartier :',
         'most_frequented_stations_arrival_bixi_wrap' : "**Stations les plus fréquentées pour déposer un vélo :**",
         'most_frequented_stations_departure_bixi_wrap' : "**Stations les plus fréquentées pour prendre un vélo :**",
@@ -255,6 +284,14 @@ with home_page:
     # Load the image from your local folder
     img = Image.open("img_homepage2.png")
     st.image(img)
+
+    st.subheader(T['app_description_header'])
+    st.markdown(T['app_description'])
+
+    st.divider()
+
+    st.subheader(T['author_description_header'])
+    st.markdown(T['author_description'])
 
 
 ##########################################################################
