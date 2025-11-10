@@ -56,13 +56,20 @@ def generate_colour_dot_plot(df, station_name, weekday, bike_or_dock):
     # Remove axes and grid
     fig.update_layout(
         height=150,
-        width=1300,
+        autosize=True,
         margin=dict(l=0, r=0, t=0, b=0),
         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
         yaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
     )
+
+    # Disable zoom, pan, etc.
+    fig.update_layout(
+        dragmode=False,
+        hovermode=False
+    )
+
     return fig
 
 
@@ -162,7 +169,7 @@ texts = {
         'day_selection_stations' : "Pick a day of the week:",
         'list_of_day_selections_stations' : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         'bike_dock_selection_stations' : "Looking for a bike or a dock",
-        'station_not_found_recently' : "This station has not been found/used for some time. It is possible that the station does not exist anymore or has been moved.",
+        'station_not_found_recently' : "This station has not been found/used for some time. It is possible that the station does not exist anymore, has been moved or renamed in Bixi's database.",
         'station_stats_departure_stations' : "Most departures occur at:",
         'station_stats_arrival_stations' : "Most arrivals occur at:",
         'colour_plot_legend_green_dock_stations' : "🟢: Good chance you'll find a dock",
@@ -210,7 +217,7 @@ texts = {
         'day_selection_stations' : "Choisissez un jour de la semaine:",
         'list_of_day_selections_stations' : ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
         'bike_dock_selection_stations' : "Vous cherchez un vélo ou un ancrage",
-        'station_not_found_recently' : "Cette station n'a pas été utilisée depuis longtemps. Il est possible qu'elle a été enlevée ou déplacée autre part.",
+        'station_not_found_recently' : "Cette station n'a pas été utilisée depuis longtemps. Il est possible qu'elle a été enlevée, déplacée autre part ou renomée dans la base de donnée de Bixi.",
         'station_stats_departure_stations' : "La plupart des départs ont lieu à :",
         'station_stats_arrival_stations' : "La plupart des arrivées ont lieu à :",
         'colour_plot_legend_green_dock_stations' : "🟢 : Bonnes chances de trouver un ancrage",
@@ -326,6 +333,7 @@ with stations:
     station_selection = station_selection_col.selectbox(
         T['station_selection_stations'],
         sorted(station_stats['station'].tolist()),
+        index=165,
     )
 
     day_selection = day_selection_col.selectbox(
@@ -341,13 +349,13 @@ with stations:
     station_latitude = station_stats[station_stats['station']==station_selection].iloc[0]['latitude']
     station_longitude = station_stats[station_stats['station']==station_selection].iloc[0]['longitude']
 
-    busiest_hour_departure = station_time_summary[station_time_summary['rides_departure_mean']==station_time_summary['rides_departure_mean'].max()].iloc[0]['hour']
-    busiest_hour_arrival = station_time_summary[station_time_summary['rides_arrival_mean']==station_time_summary['rides_arrival_mean'].max()].iloc[0]['hour']
-
     ex_station = station_time_summary[
         (station_time_summary['station'] == station_selection) &
         (station_time_summary['weekday'] == day_numeric)
     ]
+
+    busiest_hour_departure = ex_station[ex_station['rides_departure_mean']==ex_station['rides_departure_mean'].max()].iloc[0]['hour']
+    busiest_hour_arrival = ex_station[ex_station['rides_arrival_mean']==ex_station['rides_arrival_mean'].max()].iloc[0]['hour']
 
     ex_station = ex_station.sort_values("hour")
 
@@ -375,7 +383,7 @@ with stations:
     colour_dot_plot = generate_colour_dot_plot(df=station_time, station_name=station_selection, weekday=day_numeric, bike_or_dock=bike_dock_selection)
 
     # Display in Streamlit
-    st.plotly_chart(colour_dot_plot, use_container_width=False, config=config, key='main')
+    st.plotly_chart(colour_dot_plot, use_container_width=True, config=config, key='main')
 
 
 
@@ -415,7 +423,7 @@ with stations:
             with st.expander(f"{station_selection}, {nearby_stations_df.iloc[nearby_station]['distance_m']} m ⚠️" if station_selection not in recent_station['station'].tolist() else f"{station_selection}, {nearby_stations_df.iloc[nearby_station]['distance_m']} m"):
                 colour_dot_plot = generate_colour_dot_plot(df=station_time, station_name=station_selection, weekday=day_numeric, bike_or_dock=bike_dock_selection)
                 # Display in Streamlit
-                st.plotly_chart(colour_dot_plot, use_container_width=False, config=config, key=f"colour_plot_{station_selection}")
+                st.plotly_chart(colour_dot_plot, use_container_width=True, config=config, key=f"colour_plot_{station_selection}")
                 if station_selection not in recent_station['station'].tolist():
                     st.warning(body=T['station_not_found_recently'], icon='⚠️')
 

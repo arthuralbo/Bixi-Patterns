@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.4 (2025-11-09)
+
+- Changed the display of the colour dots graph to fit better on the phone
+
 ## 0.0.3 (2025-11-09)
 
 - Changed the main script to be lighter and can cache more information.
