@@ -240,9 +240,32 @@ if "tab" not in st.session_state:
 # ======================================
 # Reading Data
 # ======================================
-station_stats = pd.read_csv('./bixi_station_stats.csv')
-station_time = pd.read_csv('./bixi_time.csv')
-recent_station = pd.read_csv('./recent_stations.csv')
+@st.cache_data
+def load_station_stats():
+    return pd.read_csv('./bixi_station_stats.csv')
+
+@st.cache_data
+def load_station_time():
+    return pd.read_csv('./bixi_time.csv')
+
+@st.cache_data
+def load_recent_station():
+    return pd.read_csv('./recent_stations.csv')
+
+station_stats = load_station_stats()
+station_time = load_station_time()
+recent_station = load_recent_station()
+
+@st.cache_data
+def preprocess_station_time(df):
+    # Compute mean rides per station per weekday per hour
+    grouped = df.groupby(['station', 'weekday', 'hour']).agg(
+        rides_departure_mean=('rides_departure', 'mean'),
+        rides_arrival_mean=('rides_arrival', 'mean')
+    ).reset_index()
+    return grouped
+
+station_time_summary = preprocess_station_time(station_time)
 
 day_of_week_dict = {
     'EN': {
@@ -309,7 +332,6 @@ with stations:
         T['day_selection_stations'],
         T['list_of_day_selections_stations'],
     )
-    # day_numeric = day_of_week_dict.keys()[day_of_week_dict.values().index(day_selection)]
     day_numeric = next((k for k, v in day_of_week_dict[st.session_state.lang].items() if v == day_selection), None)
 
     bike_dock_selection = bike_dock_selection_col.segmented_control(
@@ -319,15 +341,13 @@ with stations:
     station_latitude = station_stats[station_stats['station']==station_selection].iloc[0]['latitude']
     station_longitude = station_stats[station_stats['station']==station_selection].iloc[0]['longitude']
 
-    num_of_weeks_observed = len(station_time[station_time['weekday']==day_numeric][station_time[station_time['weekday']==day_numeric]['station']==station_selection])
-    ex_station = station_time[station_time['station'] == station_selection]
-    ex_station = ex_station[ex_station['weekday'] == day_numeric]
-    ex_station['rides_departure'] = ex_station['rides_departure']/num_of_weeks_observed
-    ex_station['rides_arrival'] = ex_station['rides_arrival']/num_of_weeks_observed
-    ex_station['net_rides'] = ex_station['rides_departure'] - ex_station['rides_arrival'] if bike_dock_selection=='🅿️' else ex_station['rides_arrival'] - ex_station['rides_departure']
+    busiest_hour_departure = station_time_summary[station_time_summary['rides_departure_mean']==station_time_summary['rides_departure_mean'].max()].iloc[0]['hour']
+    busiest_hour_arrival = station_time_summary[station_time_summary['rides_arrival_mean']==station_time_summary['rides_arrival_mean'].max()].iloc[0]['hour']
 
-    busiest_hour_departure = ex_station[ex_station['rides_departure']==ex_station['rides_departure'].max()].iloc[0]['hour']
-    busiest_hour_arrival = ex_station[ex_station['rides_arrival']==ex_station['rides_arrival'].max()].iloc[0]['hour']
+    ex_station = station_time_summary[
+        (station_time_summary['station'] == station_selection) &
+        (station_time_summary['weekday'] == day_numeric)
+    ]
 
     ex_station = ex_station.sort_values("hour")
 
@@ -338,8 +358,8 @@ with stations:
 
     # Resume Insights
     departure_stats_col, arrival_stats_col, colour_legend_col = st.columns(spec=[0.33, 0.33, 0.34], gap='small')
-    departure_stats_col.metric(T['station_stats_departure_stations'], f"{busiest_hour_departure}h", f"approx {int(ex_station['rides_departure'].max())} {T['departure']}") 
-    arrival_stats_col.metric(T['station_stats_arrival_stations'], f"{busiest_hour_arrival}h", f"approx {int(ex_station['rides_arrival'].max())} {T['arrival']}")
+    departure_stats_col.metric(T['station_stats_departure_stations'], f"{busiest_hour_departure}h") 
+    arrival_stats_col.metric(T['station_stats_arrival_stations'], f"{busiest_hour_arrival}h")
     with colour_legend_col.container(border=True):
         if bike_dock_selection=='🅿️':
             st.markdown(T['colour_plot_legend_green_dock_stations'])
