@@ -5,7 +5,7 @@ from PIL import Image
 import plotly.graph_objects as go
 import pydeck as pdk
 
-def generate_colour_dot_plot(df, station_name, weekday, bike_or_dock):
+def generate_colour_dot_plot(df, station_name, weekday, bike_or_dock, mobile):
     num_of_weeks_observed = len(df[df['weekday']==weekday][df[df['weekday']==weekday]['station']==station_name])
     ex_station = df[df['station'] == station_name]
     ex_station = ex_station[ex_station['weekday'] == weekday]
@@ -44,7 +44,7 @@ def generate_colour_dot_plot(df, station_name, weekday, bike_or_dock):
         y=[0]*len(colour_dot_plot_df),
         mode="markers+text",
         marker=dict(
-            size=18,
+            size=14 if mobile else 18,
             color=colour_dot_plot_df["color"],
             line=dict(width=0)
         ),
@@ -89,7 +89,7 @@ def generate_dist_plot(df, station_name, weekday, bike_or_dock, language):
     fig.add_trace(go.Scatter(
         x=ex_station['hour'], y=ex_station['rides_departure'],
         mode='lines',
-        name='Rides departure',
+        name='Rides departure' if language=='EN' else "Nombre de départs",
         fill='tozeroy',  # Fill to bottom
         line=dict(color='green' if bike_or_dock=='🅿️' else 'orange', width=2)
     ))
@@ -98,7 +98,7 @@ def generate_dist_plot(df, station_name, weekday, bike_or_dock, language):
     fig.add_trace(go.Scatter(
         x=ex_station['hour'], y=ex_station['rides_arrival'],
         mode='lines',
-        name='Rides arrival',
+        name='Rides arrival' if language=='EN' else "Nombre d'arrivées",
         fill='tozeroy',
         line=dict(color='orange' if bike_or_dock=='🅿️' else 'green', width=2)
     ))
@@ -110,7 +110,7 @@ def generate_dist_plot(df, station_name, weekday, bike_or_dock, language):
         yaxis_title="Ride Count" if language=='EN' else "Nombre de trajets",
         xaxis=dict(tickmode='linear', dtick=1),
         template='simple_white',
-        showlegend=False,
+        showlegend=True,
         height=300,
         width=1200
     )
@@ -129,6 +129,8 @@ st.set_page_config(
 # ======================================
 # 🌐 LANGUAGE SETUP & TABS SETUP
 # ======================================
+is_mobile = st.session_state.get("is_mobile", False)
+
 if "lang" not in st.session_state:
     st.session_state.lang = "FR"
 
@@ -148,7 +150,7 @@ texts = {
         'all' : 'All',
         'departure' : 'departures',
         'arrival' : 'arrivals',
-        'title_homepage' : 'Decoding Bixi Rides Pattern',
+        'title_homepage' : 'Optimise your Bixi Rides and save time',
         'intro_homepage' : "Discover when each Bixi station fills up or empties for any given day. Perfect for planning your rides or understanding the city’s biking rhythm.",
         'app_description_header' : "🚲 About the project:",
         'app_description' : """
@@ -195,8 +197,8 @@ texts = {
         'all' : 'Tous',
         'departure' : 'départs',
         'arrival' : 'arrivées',
-        'title_homepage' : "Le battement des stations Bixi",
-        'intro_homepage' : "Découvrez quand chaque station s’anime ou se repose, selon le jour de la semaine. Idéal pour planifier vos trajets ou comprendre le rythme cycliste de la ville.",
+        'title_homepage' : "Planifie tes trajets en Bixi plus intelligement",
+        'intro_homepage' : "Découvrez à quel moment les stations se remplissent ou se vident, selon les jours de la semaine et les heures, idéal pour optimiser vos trajets.",
         'app_description_header' : "🚲 À propos de ce projet:",
         'app_description' : """
             Vous est-il déjà arrivé de courir après un Bixi un matin pressé… pour finalement ne trouver aucun vélo disponible?
@@ -309,7 +311,7 @@ home_page, stations, bixi_wrap = st.tabs([T['tab_home'],T['tab_stations'], T['ta
 with home_page:
     st.session_state.tab = 'tab_home'
     st.title(T['title_homepage'])
-    st.markdown(T['intro_homepage'])
+    st.subheader(T['intro_homepage'])
 
     # Load the image from your local folder
     img = Image.open("img_homepage2.png")
@@ -322,6 +324,16 @@ with home_page:
 
     st.subheader(T['author_description_header'])
     st.markdown(T['author_description'])
+
+    st.divider()
+
+    st.markdown(
+    """
+    **Sources de données :**  
+    • [Bixi Montréal](https://www.bixi.com/fr/donnees-ouvertes)
+    """,
+    unsafe_allow_html=True
+)
 
 
 ##########################################################################
@@ -380,7 +392,7 @@ with stations:
         st.markdown(T['colour_plot_legend_grey_stations'])
 
     # Colour dot plot
-    colour_dot_plot = generate_colour_dot_plot(df=station_time, station_name=station_selection, weekday=day_numeric, bike_or_dock=bike_dock_selection)
+    colour_dot_plot = generate_colour_dot_plot(df=station_time, station_name=station_selection, weekday=day_numeric, bike_or_dock=bike_dock_selection, mobile=is_mobile)
 
     # Display in Streamlit
     st.plotly_chart(colour_dot_plot, use_container_width=True, config=config, key='main')
@@ -421,7 +433,7 @@ with stations:
         for nearby_station in range(len(nearby_stations_df)):
             station_selection = nearby_stations_df.iloc[nearby_station]['station']
             with st.expander(f"{station_selection}, {nearby_stations_df.iloc[nearby_station]['distance_m']} m ⚠️" if station_selection not in recent_station['station'].tolist() else f"{station_selection}, {nearby_stations_df.iloc[nearby_station]['distance_m']} m"):
-                colour_dot_plot = generate_colour_dot_plot(df=station_time, station_name=station_selection, weekday=day_numeric, bike_or_dock=bike_dock_selection)
+                colour_dot_plot = generate_colour_dot_plot(df=station_time, station_name=station_selection, weekday=day_numeric, bike_or_dock=bike_dock_selection, mobile=is_mobile)
                 # Display in Streamlit
                 st.plotly_chart(colour_dot_plot, use_container_width=True, config=config, key=f"colour_plot_{station_selection}")
                 if station_selection not in recent_station['station'].tolist():
@@ -447,22 +459,30 @@ with bixi_wrap:
     with stats_col.container(border=True):
         arrondissement_selection = st.selectbox(T['filtering_neighbourhood_bixi_wrap'], [T['all']] + station_stats['arrondissement'].unique().tolist())
         rank_station = station_stats['rides_departure'].nlargest(3) if arrondissement_selection==T['all'] else station_stats[station_stats['arrondissement']==arrondissement_selection]['rides_departure'].nlargest(3)
-        rank_station_list = [f"{station_stats['station'].loc[rank_station.index[0]]}", f"{station_stats['station'].loc[rank_station.index[1]]}", f"{station_stats['station'].loc[rank_station.index[2]]}"]
+        rank_station_list = []
         rank_station_list_lon_lat = {
-            'lon' : [station_stats['longitude'].loc[rank_station.index[0]], station_stats['longitude'].loc[rank_station.index[1]], station_stats['longitude'].loc[rank_station.index[2]]],
-            'lat' : [station_stats['latitude'].loc[rank_station.index[0]], station_stats['latitude'].loc[rank_station.index[1]], station_stats['latitude'].loc[rank_station.index[2]]]
+            'lon' : [],
+            'lat' : [],
         }
+        for rank in range(len(rank_station)):
+            rank_station_list.append(f"{station_stats['station'].loc[rank_station.index[rank]]}")
+            rank_station_list_lon_lat['lon'].append(station_stats['longitude'].loc[rank_station.index[rank]])
+            rank_station_list_lon_lat['lat'].append(station_stats['latitude'].loc[rank_station.index[rank]])
+
+        rank_icon = ['🥇', '🥈', '🥉']
         
         if bixi_wrap_bike_dock_selection=='🅿️':
             st.markdown(T['most_frequented_stations_arrival_bixi_wrap'])
-            st.markdown(f"🥇 {rank_station_list[0]} : {int(station_stats['rides_arrival'].loc[rank_station.index[0]])} {T['arrival']}")
-            st.markdown(f"🥈 {rank_station_list[1]} : {int(station_stats['rides_arrival'].loc[rank_station.index[1]])} {T['arrival']}")
-            st.markdown(f"🥉 {rank_station_list[2]} : {int(station_stats['rides_arrival'].loc[rank_station.index[2]])} {T['arrival']}")
+            for rank in range(len(rank_station)):
+                st.markdown(f"{rank_icon[rank]} {rank_station_list[rank]} : {int(station_stats['rides_arrival'].loc[rank_station.index[rank]])} {T['arrival']}")
+            # st.markdown(f"🥈 {rank_station_list[1]} : {int(station_stats['rides_arrival'].loc[rank_station.index[1]])} {T['arrival']}")
+            # st.markdown(f"🥉 {rank_station_list[2]} : {int(station_stats['rides_arrival'].loc[rank_station.index[2]])} {T['arrival']}")
         else:
             st.markdown(T['most_frequented_stations_departure_bixi_wrap'])
-            st.markdown(f"🥇 {rank_station_list[0]} : {int(station_stats['rides_departure'].loc[rank_station.index[0]])} {T['departure']}") 
-            st.markdown(f"🥈 {rank_station_list[1]} : {int(station_stats['rides_departure'].loc[rank_station.index[1]])} {T['departure']}")
-            st.markdown(f"🥉 {rank_station_list[2]} : {int(station_stats['rides_departure'].loc[rank_station.index[2]])} {T['departure']}")
+            for rank in range(len(rank_station)):
+                st.markdown(f"{rank_icon[rank]} {rank_station_list[rank]} : {int(station_stats['rides_departure'].loc[rank_station.index[rank]])} {T['departure']}") 
+            # st.markdown(f"🥈 {rank_station_list[1]} : {int(station_stats['rides_departure'].loc[rank_station.index[1]])} {T['departure']}")
+            # st.markdown(f"🥉 {rank_station_list[2]} : {int(station_stats['rides_departure'].loc[rank_station.index[2]])} {T['departure']}")
 
     # Define PyDeck layer
     def get_map_attributes(row):

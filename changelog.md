@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.5 (2025-11-10)
+
+- cleaned up some code to make it smoother, edited the texts, added the source for the data.
+
 ## 0.0.4 (2025-11-09)
 
 - Changed the display of the colour dots graph to fit better on the phone
