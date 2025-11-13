@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.8 (2025-11-12)
+
+- Added a contact link to my LinkedIn
+
+## 0.0.7 (2025-11-12)
+
+- reated a .gitignore file
+
 ## 0.0.6 (2025-11-12)
 
 - Wrote a ReadMe, added some corrections in the text of the app, added the stations count in the map.

@@ -134,15 +134,7 @@ st.set_page_config(
 # ======================================
 
 if "lang" not in st.session_state:
-    st.session_state.lang = "FR"
-
-language_homepage = st.segmented_control(
-        "", ['EN', 'FR'], selection_mode="single", default=st.session_state.lang
-    )
-if language_homepage=='EN':
     st.session_state.lang = "EN"
-if language_homepage=='FR':
-    st.session_state.lang = "FR"
 
 texts = {
     'EN' : {
@@ -168,6 +160,7 @@ texts = {
             My name is Arthur Albo, and I’m a student in mathematics and statistics with a passion for data science. This project was born from both my interest in data analysis and a personal experience: as a regular Bixi user, I’ve often struggled to find an available bike when I needed one, or a free dock at the end of my ride.
             I created this app to provide a simple, visual tool that helps users better understand the system and anticipate trends, making daily rides a little easier and more predictable.
             """,
+        'data_source' : 'Data Source',
         'intro_stations' : "Find out about your station's rythm and plan your trips smarter",
         'station_selection_stations' : "Pick a station and start exploring",
         'day_selection_stations' : "Pick a day of the week:",
@@ -218,6 +211,7 @@ texts = {
             Ce projet est né à la fois d’un intérêt pour l’analyse de données et d’une expérience personnelle : en tant qu’utilisateur régulier de Bixi, j’ai souvent eu du mal à trouver un vélo ou un point d'ancrage libre. 
             J’ai donc voulu créer un outil simple et visuel pour mieux comprendre le système et anticiper ses tendances.
             """,
+        'data_source' : "Source des données",
         'intro_stations' : "Découvrez le rythme de votre station",
         'station_selection_stations' : "Choisissez une station et commencez votre exploration",
         'day_selection_stations' : "Choisissez un jour de la semaine:",
@@ -312,6 +306,15 @@ config = {
 # ======================================
 # 🧭 HEADER
 # ======================================
+
+language_homepage = st.segmented_control(
+        "", ['EN', 'FR'], selection_mode="single", default=st.session_state.lang
+    )
+if language_homepage=='EN':
+    st.session_state.lang = "EN"
+if language_homepage=='FR':
+    st.session_state.lang = "FR"
+
 home_page, stations, bixi_wrap = st.tabs([T['tab_home'],T['tab_stations'], T['tab_bixi_wrap']], default=T['tab_home'])
 
 with home_page:
@@ -330,12 +333,19 @@ with home_page:
 
     st.subheader(T['author_description_header'])
     st.markdown(T['author_description'])
+    st.markdown(
+        f"""
+        **Contact :**  
+        • [LinkedIn](https://www.linkedin.com/in/arthur-albo-a02839206)
+        """,
+        unsafe_allow_html=True
+    )
 
     st.divider()
 
     st.markdown(
-    """
-    **Sources de données :**  
+    f"""
+    **{T['data_source']} :**  
     • [Bixi Montréal](https://www.bixi.com/fr/donnees-ouvertes)
     """,
     unsafe_allow_html=True
